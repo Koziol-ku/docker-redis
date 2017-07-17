@@ -10,6 +10,9 @@ RUN chmod +x run.sh \
     && apt-get update \
     && apt-get install -y build-essential \
     && curl -LO http://download.redis.io/releases/redis-$REDIS_VERSION.tar.gz \
+    && curl -LO http://download.redis.io/redis-stable/src/redis-trib.rb \
+    && chmod +x redis-trib.rb \
+    && gem install redis \
     && mkdir -p /usr/src/redis \
     && tar -xzf redis-$REDIS_VERSION.tar.gz -C /usr/src/redis --strip-components=1 \
     && rm redis-$REDIS_VERSION.tar.gz \
@@ -32,4 +35,3 @@ WORKDIR /data
 EXPOSE 6379
 
 ENTRYPOINT ["/run.sh"]
-

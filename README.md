@@ -19,7 +19,7 @@ Configuration should be passed via environment variables.
     * `SENTINEL_SLAVE` -  - redis will be run as Sentinel Slave node (for Sentinel mode)
     * `CLUSTER_NODE` - redis will be run as Cluster node (for Cluster mode)
     * `STANDALONE` - redis will be run as Standalone node (for Standalone mode)
-
+    * `CLUSTER_NODE_COMPOSE` - redis will be run as Cluster node (for Cluster mode) dedicated for docker compose environments
 ### Environment variables used in Sentinel mode:
 
 * `SENTINEL_MASTER_ID` - name of master configured in `sentinel.conf` used to monitoring
@@ -62,3 +62,17 @@ and two nodes run as a Slaves.
 ### Redis Standalone
 
 [Here](example/k8s/standalone) is example configuration
+
+
+## How to run it in docker?
+
+### Redis cluster on docker
+
+Create redis containers on multiple hosts using command: `docker run -d -v $HOME/data:/data -e "REDIS_NODE_TYPE=CLUSTER_NODE_COMPOSE" --network="host" --name=redis oberthur/docker-redis:3.2.5`
+or with custom configuration for example: `docker run -d -v $HOME/data:/data -e "REDIS_NODE_TYPE=CLUSTER_NODE_COMPOSE" -e "REDIS_CONFIG=port 6379\ncluster-node-timeout 1000\ncluster-require-full-coverage yes" --network="host" --name=redis oberthur/docker-redis:3.2.5`
+
+Create cluster running command on single node `docker run -it --entrypoint /redis-trib.rb --network="host" oberthur/docker-redis:3.2.5 create --replicas 1 ip1:port1 ip2:port2 ...`, where `ip1:port1 ip2:port2` is the list of all nodes in cluster.
+
+### Redis cluster on docker - compose manifests
+
+Deploy redis containers on hosts using [manifest](example/compose/redis.yaml), then create cluster running command on single node `docker run -it --entrypoint /redis-trib.rb --network="host" oberthur/docker-redis:3.2.5 create --replicas 1 ip1:port1 ip2:port2 ...`, where `ip1:port1 ip2:port2` is the list of all nodes in cluster.

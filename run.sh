@@ -23,6 +23,22 @@ function loadRedisConfig(){
     fi
 }
 
+function loadRedisConfigCompose(){
+    REDIS_CONFIG_FILE=redis.conf
+
+    if [ -f "${REDIS_CONFIG_FILE}" ]; then
+        log "|------------ Already found old configuration, please delete it first if you want to apply new one ------------|"
+    else
+        echo "" > ${REDIS_CONFIG_FILE}
+        if [ -n "${REDIS_CONFIG}" ]; then
+            log "|------------ Applying redis configuration from REDIS_CONFIG ------------|"
+            echo -e "${REDIS_CONFIG}" > ${REDIS_CONFIG_FILE}
+            log "|-------------------------------------------------------------------------|"
+        fi
+    fi
+
+}
+
 
 function loadSentinelConfig(){
     SENTINEL_CONFIG_FILE=sentinel.conf
@@ -144,6 +160,14 @@ function launchRedisClusterNode() {
 
 }
 
+function launchRedisClusterNodeCompose() {
+
+    log "Run node as CLUSTER NODE - docker compose"
+    loadRedisConfigCompose
+    exec redis-server ${REDIS_CONFIG_FILE} "$@" --cluster-enabled yes
+
+}
+
 function launchRedisStandalone() {
 
     log "Run node as REDIS STANDALONE"
@@ -218,6 +242,8 @@ log "Command line arguments [%s]" "$*"
 
 if [[ "${REDIS_NODE_TYPE}" == "CLUSTER_NODE" ]]; then
     launchRedisClusterNode "$@"
+elif [[ "${REDIS_NODE_TYPE}" == "CLUSTER_NODE_COMPOSE" ]]; then
+    launchRedisClusterNodeCompose "$@"
 elif [[ "${REDIS_NODE_TYPE}" == "SENTINEL_INIT_MASTER" ]]; then
     validateSentinelParams
     launchSentinelMaster "$@"

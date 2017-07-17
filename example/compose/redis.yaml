@@ -1,0 +1,13 @@
+redis:
+  container_name: redis
+  image: oberthur/docker-redis:3.2.5
+  restart: always
+  net: host
+  environment:
+    REDIS_NODE_TYPE: CLUSTER_NODE_COMPOSE
+    REDIS_CONFIG: |
+            port 6379
+            cluster-node-timeout 1000
+            cluster-require-full-coverage yes
+  volumes:
+    - /var/container_data/redis/data:/data
